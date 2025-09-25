@@ -17,10 +17,16 @@ typedef struct {
     SemaphoreHandle_t sem2;
 } deadlockArgs_t;
 
+typedef struct {
+    int* state;
+    SemaphoreHandle_t sem;
+} orphanArgs_t;
+
 int update_side(int*, SemaphoreHandle_t, TickType_t);
 int update_main(int*, SemaphoreHandle_t, TickType_t);
 
 void deadLock(void*);
-
+void simpleLock(void*);
+void orphanLock(void*);
 
 #endif

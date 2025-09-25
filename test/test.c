@@ -65,6 +65,33 @@ void testDeadlock() {
     vSemaphoreDelete(sem2);
 }
 
+void testOrphan() {
+        // construct the arguments
+    int state1, state2 = 0;
+    SemaphoreHandle_t sem = xSemaphoreCreateCounting(1, 1);
+    orphanArgs_t args1 = (orphanArgs_t){&state1, sem};
+    orphanArgs_t args2 = (orphanArgs_t){&state2, sem};
+
+    // start the threads and wait for deadlock
+    TaskHandle_t task1, task2;
+    xTaskCreate(simpleLock, "simple", configMINIMAL_STACK_SIZE, &args1, tskIDLE_PRIORITY + 1UL, &task1);
+    xTaskCreate(orphanLock, "orphan", configMINIMAL_STACK_SIZE, &args2,  tskIDLE_PRIORITY + 1UL, &task2);
+    vTaskDelay(500); // should be enough time to complete, should deadlock not occur
+
+    // suspend the tasks to check the state
+    vTaskSuspend(task1);
+    vTaskSuspend(task2);
+
+    // make sure that there is a deadlock
+    TEST_ASSERT_TRUE_MESSAGE(state1 == 0, "Task 1 deadlocked");
+    TEST_ASSERT_TRUE_MESSAGE(state2 == 2, "Task 2 did not deadlock");
+
+    // gotta get that memory back
+    vTaskDelete(task1);
+    vTaskDelete(task2);
+    vSemaphoreDelete(sem);
+}
+
 void runTests (__unused void* args)
 {
     semaphore = xSemaphoreCreateCounting(1, 1);
@@ -75,6 +102,7 @@ void runTests (__unused void* args)
         RUN_TEST(testMain);
         RUN_TEST(testSide);
         RUN_TEST(testDeadlock);
+        RUN_TEST(testOrphan);
         sleep_ms(5000);
         UNITY_END();
     }

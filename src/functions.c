@@ -44,3 +44,27 @@ void deadLock(void* argsP) {
     *(args.state) = 3;
     while (1);
 }
+
+void simpleLock(void* argsP) {
+    orphanArgs_t args = *((orphanArgs_t*)argsP);
+    *(args.state) = 0;
+    vTaskDelay(100);
+    xSemaphoreTake(args.sem, portMAX_DELAY);
+    {
+        *(args.state) = 1;
+    }
+    xSemaphoreGive(args.sem);
+    *(args.state) = 2;
+    while (1);
+}
+
+void orphanLock(void* argsP) {
+    orphanArgs_t args = *((orphanArgs_t*)argsP);
+    *(args.state) = 0;
+    xSemaphoreTake(args.sem, portMAX_DELAY);
+    {
+        *(args.state) = 1;
+    }
+    *(args.state) = 2;
+    while (1);
+}
