@@ -21,18 +21,18 @@ int on;
 void side_thread(void *params)
 {
 	while (1) {
-        vTaskDelay(100);
-        update_side(&counter, semaphore, portMAX_DELAY);
+                vTaskDelay(100);
+                update_side(&counter, semaphore, portMAX_DELAY);
 	}
 }
 
 void main_thread(void *params)
 {
 	while (1) {
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
-        vTaskDelay(100);
-        update_main(&counter, semaphore, portMAX_DELAY);
-        on = !on;
+                cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
+                vTaskDelay(100);
+                update_main(&counter, semaphore, portMAX_DELAY);
+                on = !on;
 	}
 }
 

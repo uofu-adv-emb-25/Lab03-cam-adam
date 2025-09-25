@@ -18,7 +18,7 @@ int update_side(int* counter, SemaphoreHandle_t semaphore, TickType_t ticks) {
 }
 
 int update_main(int* counter, SemaphoreHandle_t semaphore, TickType_t ticks) {
-    int out = xSemaphoreTake(semaphore, portMAX_DELAY);
+    int out = xSemaphoreTake(semaphore, ticks);
     {
 		printf("hello world from %s! Count %d\n", "main", (*counter)++);
     }
@@ -28,6 +28,7 @@ int update_main(int* counter, SemaphoreHandle_t semaphore, TickType_t ticks) {
 
 void deadLock(void* argsP) {
     deadlockArgs_t args = *((deadlockArgs_t*)argsP);
+    *(args.state) = 0;
     xSemaphoreTake(args.sem1, portMAX_DELAY);
     {
         *(args.state) = 1;
@@ -40,5 +41,6 @@ void deadLock(void* argsP) {
         xSemaphoreGive(args.sem2);
     }
     xSemaphoreGive(args.sem1);
+    *(args.state) = 3;
     while (1);
 }
